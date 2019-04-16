@@ -1,0 +1,96 @@
+---
+title: "Puzzle Solve"
+output: html_notebook
+---
+
+Start with some set up code (e.g. load necessary libraries).
+```{r setup}
+
+library(dplyr)
+library(ggplot2)
+library(magick)
+library(opencv)
+library(purrr)
+library(tesseract)
+library(stringr)
+
+# Won't attach package(s), but check to make sure available
+requireNamespace("here")
+
+# path to example image
+testP <- "img/Copy of jigsaw_puzzle_Piece1.png"
+
+```
+
+Display the test image
+```{r testImage}
+
+testImg <- image_read(here::here(testP)) %>%
+  image_fill("orange", point = "+250+250", fuzz = 90) 
+
+testImg %>%
+  image_write(here::here("img/flood_img/test_Piece1.png"), "png")
+
+
+```
+
+Define a function to flood all images as pre-processing step
+```{r floodImages}
+
+FloodImg <- function(fName){
+  
+  newFile <- file.path("img/flood_img",
+                       paste0("Flood_", 
+                              str_extract(fName, "Piece[0-9]+\\.png$"))
+                       ) %>% 
+    here::here()
+  
+  image_read(fName) %>%
+    image_fill("orange", point = "+250+250", fuzz = 90) %>%
+    image_write(newFile, "png")
+  
+}
+
+```
+
+
+
+Define a function to convert image files to traces of the outlines. 
+```{r outlineImages, echo=TRUE}
+
+# function takes image file path and returns path to new image file
+Transform2Edges <- function(fName) {
+
+  newFile <- file.path("img/edge_img",
+                       paste0("Edge_", 
+                              str_extract(fName, "Piece[0-9]+\\.png$"))
+                       ) %>%
+    here::here()
+
+  edgeOut <- ocv_read(fName) %>%
+    ocv_edges() %>%
+    ocv_write(newFile)
+
+  newFile
+}
+
+```
+
+Process Images:
+* First flood images as single color
+* Then trace enges of image
+```{r processImages}
+
+edgeFiles <- list.files(here::here("img"), pattern = "\\.png", full.names = TRUE) %>%
+  map_chr(FloodImg) %>%
+  map_chr(Transform2Edges)
+
+```
+
+
+Preview one of the new files.
+```{r previewEdge}
+image_read(edgeFiles[1]) %>%
+  print()
+```
+
