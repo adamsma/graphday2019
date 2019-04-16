@@ -22,7 +22,7 @@ testP <- "img/Copy of jigsaw_puzzle_Piece1.png"
 
 ```
 
-Display the test image
+Explore processing with test image
 ```{r testImage}
 
 testImg <- image_read(here::here(testP)) %>%
@@ -91,6 +91,7 @@ edgeFiles <- list.files(here::here("img"), pattern = "\\.png", full.names = TRUE
 Preview one of the new files.
 ```{r previewEdge}
 image_read(edgeFiles[1]) %>%
-  print()
+  as.raster() %>%
+  plot()
 ```
 
