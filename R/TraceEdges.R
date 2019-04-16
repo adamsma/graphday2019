@@ -17,7 +17,7 @@ Transform2Edges <- function(fName) {
     ocv_edges() %>%
     ocv_write(newFile)
 
-newFile
+  newFile
 }
 
 list.files("img", pattern = "\\.png", full.names = TRUE) %>%
